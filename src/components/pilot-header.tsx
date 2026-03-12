@@ -1,0 +1,238 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { Save, Loader2, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { updatePilot, deletePilot } from "@/lib/actions/pilot-actions";
+import { formatDate, STATUS_CONFIG } from "@/lib/utils";
+import { useRole } from "@/hooks/use-role";
+import type { Pilot, PilotStatus } from "@/lib/types/database";
+
+interface PilotHeaderProps {
+  pilot: Pilot;
+}
+
+export function PilotHeader({ pilot }: PilotHeaderProps) {
+  const { canEdit } = useRole();
+  const [isPending, startTransition] = useTransition();
+  const [isDeletePending, startDeleteTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  function handleDelete() {
+    startDeleteTransition(async () => {
+      await deletePilot(pilot.id);
+    });
+  }
+
+  const [name, setName] = useState(pilot.name);
+  const [objective, setObjective] = useState(pilot.objective ?? "");
+  const [status, setStatus] = useState<PilotStatus>(pilot.status);
+  const [startDate, setStartDate] = useState(pilot.start_date ?? "");
+  const [endDate, setEndDate] = useState(pilot.end_date ?? "");
+  const [trainedPeople, setTrainedPeople] = useState(pilot.trained_people_count);
+
+  const isDirty =
+    name !== pilot.name ||
+    objective !== (pilot.objective ?? "") ||
+    status !== pilot.status ||
+    startDate !== (pilot.start_date ?? "") ||
+    endDate !== (pilot.end_date ?? "") ||
+    trainedPeople !== pilot.trained_people_count;
+
+  function handleSave() {
+    setError(null);
+    setSuccess(false);
+    startTransition(async () => {
+      const result = await updatePilot(pilot.id, {
+        name,
+        objective: objective || undefined,
+        status,
+        start_date: startDate || null,
+        end_date: endDate || null,
+        trained_people_count: trainedPeople,
+      });
+      if (result.success) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 2000);
+      } else {
+        setError(result.error ?? "Error al guardar");
+      }
+    });
+  }
+
+  const statusCfg = STATUS_CONFIG[status];
+
+  if (!canEdit) {
+    return (
+      <div className="rounded-lg border border-[#E4E7EC] bg-white p-6 shadow-card">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-semibold text-[#101828]">{pilot.name}</h1>
+            {pilot.objective && (
+              <p className="mt-1 text-sm text-[#667085]">{pilot.objective}</p>
+            )}
+            <p className="mt-2 text-xs text-[#667085]">
+              {formatDate(pilot.start_date)} — {formatDate(pilot.end_date)}
+            </p>
+          </div>
+          <Badge color={statusCfg.color} bgColor={statusCfg.bgColor} className="shrink-0">
+            {statusCfg.label}
+          </Badge>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar piloto</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[#667085]">
+            ¿Estás seguro de que quieres eliminar{" "}
+            <span className="font-medium text-[#101828]">{pilot.name}</span>?
+            Esta acción eliminará también todos sus eventos de impacto y no se puede deshacer.
+          </p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={isDeletePending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={isDeletePending}
+            >
+              {isDeletePending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4" />
+                  Eliminar
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+    <div className="rounded-lg border border-[#E4E7EC] bg-white p-6 shadow-card">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="sm:col-span-2 flex flex-col gap-1.5">
+          <Label htmlFor="pilot-name">Nombre del piloto *</Label>
+          <Input
+            id="pilot-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nombre del piloto"
+            className="text-base font-medium"
+          />
+        </div>
+
+        <div className="sm:col-span-2 flex flex-col gap-1.5">
+          <Label htmlFor="pilot-objective">Objetivo funcional</Label>
+          <Input
+            id="pilot-objective"
+            value={objective}
+            onChange={(e) => setObjective(e.target.value)}
+            placeholder="Describe el objetivo del piloto"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label>Estado</Label>
+          <Select value={status} onValueChange={(v) => setStatus(v as PilotStatus)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="planificado">Planificado</SelectItem>
+              <SelectItem value="en_marcha">En marcha</SelectItem>
+              <SelectItem value="finalizado">Finalizado</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="trained-people">Personas formadas (piloto)</Label>
+          <Input
+            id="trained-people"
+            type="number"
+            min={0}
+            value={trainedPeople}
+            onChange={(e) => setTrainedPeople(parseInt(e.target.value) || 0)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="start-date">Fecha inicio</Label>
+          <Input
+            id="start-date"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="end-date">Fecha fin</Label>
+          <Input
+            id="end-date"
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-3 rounded-md bg-[#FEF3F2] border border-[#FECDCA] px-3 py-2 text-sm text-[#DC2626]">
+          {error}
+        </div>
+      )}
+
+      <div className="mt-4 flex items-center justify-between gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowDeleteDialog(true)}
+          className="text-[#DC2626] border-[#FECDCA] hover:bg-[#FEF3F2] hover:text-[#DC2626]"
+        >
+          <Trash2 className="h-4 w-4" />
+          Eliminar piloto
+        </Button>
+
+        {isDirty && (
+          <Button onClick={handleSave} disabled={isPending} size="sm">
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : success ? (
+              "¡Guardado!"
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Guardar
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
+    </>
+  );
+}

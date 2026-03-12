@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-page: #F5F5F7;
+  --bg-surface: #FFFFFF;
+  --border-subtle: #E4E7EC;
+  --text-main: #101828;
+  --text-secondary: #667085;
+  --icon-muted: #98A2B3;
+  --primary: #2563EB;
+  --primary-soft: #EFF4FF;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+  height: 100%;
+}
