@@ -1,0 +1,4 @@
+# Configuracion minima para Supabase CLI
+# No incluye secretos ni credenciales.
+
+project_id = "SeguimientoPilotos"
