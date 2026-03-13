@@ -33,16 +33,20 @@ export async function getGlobalKPIs(): Promise<GlobalKPIs> {
   if (prodError) throw prodError;
 
   const activePilots =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (pilots as any[])?.filter((p: any) => p.status === "en_marcha").length ?? 0;
+    (pilots as { status?: string }[])?.filter(
+      (p: { status?: string }) => p.status === "en_marcha"
+    ).length ?? 0;
 
   const fromPilots =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (pilots as any[])?.reduce((sum: number, p: any) => sum + (p.trained_people_count ?? 0), 0) ?? 0;
+    (pilots as { trained_people_count?: number | null }[])?.reduce(
+      (sum: number, p: { trained_people_count?: number | null }) =>
+        sum + (p.trained_people_count ?? 0),
+      0
+    ) ?? 0;
   const fromFormacionEvents =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (eventsFormacion as any[])?.reduce(
-      (sum: number, e: any) => sum + (e.trained_people_event ?? 0),
+    (eventsFormacion as { trained_people_event?: number | null }[])?.reduce(
+      (sum: number, e: { trained_people_event?: number | null }) =>
+        sum + (e.trained_people_event ?? 0),
       0
     ) ?? 0;
   const totalTrainedPeople = fromPilots + fromFormacionEvents;
@@ -103,18 +107,18 @@ export async function getPilotKPIs(pilotId: string): Promise<PilotKPIs> {
 
   const fromPilot = pilot?.trained_people_count ?? 0;
   const fromFormacionEvents =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (eventsFormacion as any[])?.reduce(
-      (sum: number, e: any) => sum + (e.trained_people_event ?? 0),
+    (eventsFormacion as { trained_people_event?: number | null }[])?.reduce(
+      (sum: number, e: { trained_people_event?: number | null }) =>
+        sum + (e.trained_people_event ?? 0),
       0
     ) ?? 0;
   const trainedPeopleCount = fromPilot + fromFormacionEvents;
 
   const base = pilot?.productivity_improvement_base ?? 0;
   const fromProductividadEvents =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (eventsProductividad as any[])?.reduce(
-      (sum: number, e: any) => sum + (e.productivity_improvement_pct ?? 0),
+    (eventsProductividad as { productivity_improvement_pct?: number | null }[])?.reduce(
+      (sum: number, e: { productivity_improvement_pct?: number | null }) =>
+        sum + (e.productivity_improvement_pct ?? 0),
       0
     ) ?? 0;
   const productivityImprovementPct = base + fromProductividadEvents;
