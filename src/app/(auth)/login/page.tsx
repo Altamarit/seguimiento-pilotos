@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { loginOrCreate } from "@/lib/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [userIdentifier, setUserIdentifier] = useState("");
   const [alias, setAlias] = useState("");
   const [password, setPassword] = useState("");
@@ -34,8 +32,9 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    // Redirección completa (no router.push) para que las cookies de sesión
+    // de la Server Action estén ya en el navegador antes de la siguiente petición.
+    window.location.href = "/";
   }
 
   return (

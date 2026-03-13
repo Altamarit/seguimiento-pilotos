@@ -209,6 +209,8 @@ Browser                    Next.js (Vercel)              Supabase Auth
 - **Middleware** (`middleware.ts`): intercepta todas las rutas bajo `/(dashboard)`, refresca el token JWT si está próximo a expirar, redirige a `/login` si no hay sesión válida.
 - **Cookies httpOnly**: las sesiones se gestionan con `@supabase/ssr` usando cookies, nunca localStorage.
 
+**Importante – Redirección tras login**: Tras un login exitoso desde una Server Action (p. ej. `signInWithPassword`), las cookies de sesión se envían en la respuesta. Para asegurar que el navegador las procese antes de la siguiente petición, **siempre** usar redirección completa (`window.location.href = "/"`) y **nunca** `router.push("/")`. Con `router.push`, la navegación cliente puede ocurrir antes de que las cookies estén disponibles, dejando al usuario atrapado en la pantalla de login.
+
 ### 6.2 Autorización por roles
 
 La autorización se aplica en **dos capas**:
