@@ -52,9 +52,7 @@ function LoginForm() {
       return;
     }
 
-    if (result.actionLink) {
-      window.location.href = result.actionLink;
-    }
+    window.location.href = result.actionLink ?? "/";
   }
 
   return (

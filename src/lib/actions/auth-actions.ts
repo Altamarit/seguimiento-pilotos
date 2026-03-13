@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -59,11 +58,15 @@ async function syncAlias(
   });
 }
 
-async function getCallbackUrl(): Promise<string> {
-  const headersList = await headers();
-  const host = headersList.get("host") ?? "localhost:3000";
-  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
-  return `${protocol}://${host}/auth/callback`;
+async function verifyMagicToken(authEmail: string, actionLink: string): Promise<AuthResult> {
+  const token = new URL(actionLink).searchParams.get("token");
+  if (!token) return { success: false, error: "No se pudo obtener el token de verificación." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({ email: authEmail, token, type: "magiclink" });
+  if (error) return { success: false, error: error.message };
+
+  return { success: true };
 }
 
 async function loginWithMagicLink(
@@ -73,12 +76,9 @@ async function loginWithMagicLink(
   alias: string,
   userIdentifier: string
 ): Promise<AuthResult> {
-  const redirectTo = await getCallbackUrl();
-
   const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
     type: "magiclink",
     email: authEmail,
-    options: { redirectTo },
   });
 
   if (linkError) {
@@ -95,14 +95,14 @@ async function loginWithMagicLink(
     const { data: newLinkData, error: newLinkError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
       email: authEmail,
-      options: { redirectTo },
     });
     if (newLinkError) return { success: false, error: newLinkError.message };
-    return { success: true, actionLink: newLinkData.properties.action_link };
+
+    return verifyMagicToken(authEmail, newLinkData.properties.action_link);
   } else {
     // Usuario existe → actualizar alias
     await syncAlias(adminClient, linkData.user.id, alias, userIdentifier);
-    return { success: true, actionLink: linkData.properties.action_link };
+    return verifyMagicToken(authEmail, linkData.properties.action_link);
   }
 }
 
