@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -58,6 +59,13 @@ async function syncAlias(
   });
 }
 
+async function getCallbackUrl(): Promise<string> {
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "localhost:3000";
+  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
+  return `${protocol}://${host}/auth/callback`;
+}
+
 async function loginWithMagicLink(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adminClient: any,
@@ -65,11 +73,12 @@ async function loginWithMagicLink(
   alias: string,
   userIdentifier: string
 ): Promise<AuthResult> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // Intentar generar magic link (falla si el usuario no existe)
+  const redirectTo = await getCallbackUrl();
+
   const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
     type: "magiclink",
     email: authEmail,
+    options: { redirectTo },
   });
 
   if (linkError) {
@@ -86,6 +95,7 @@ async function loginWithMagicLink(
     const { data: newLinkData, error: newLinkError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
       email: authEmail,
+      options: { redirectTo },
     });
     if (newLinkError) return { success: false, error: newLinkError.message };
     return { success: true, actionLink: newLinkData.properties.action_link };
