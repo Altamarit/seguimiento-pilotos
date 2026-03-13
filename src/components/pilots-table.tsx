@@ -1,17 +1,44 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { formatDate, formatDateShort, STATUS_CONFIG } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRole } from "@/hooks/use-role";
 import type { Pilot } from "@/lib/types/database";
 
 interface PilotsTableProps {
   pilots: Pilot[];
+  productivityMap?: Record<string, number | null>;
+  participantesMap?: Record<string, number>;
 }
 
-export function PilotsTable({ pilots }: PilotsTableProps) {
+export function PilotsTable({
+  pilots,
+  productivityMap = {},
+  participantesMap = {},
+}: PilotsTableProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { canEdit } = useRole();
+
+  function buildPilotHref(pilotId: string, openEventModal = false) {
+    const params = new URLSearchParams();
+    const currentView = searchParams.get("view");
+
+    if (currentView) {
+      params.set("view", currentView);
+    }
+
+    if (openEventModal) {
+      params.set("openEvent", "1");
+    }
+
+    const query = params.toString();
+    return query ? `/pilots/${pilotId}?${query}` : `/pilots/${pilotId}`;
+  }
 
   if (pilots.length === 0) {
     return (
@@ -33,45 +60,71 @@ export function PilotsTable({ pilots }: PilotsTableProps) {
         {pilots.map((pilot) => {
           const statusCfg = STATUS_CONFIG[pilot.status];
           return (
-            <button
+            <div
               key={pilot.id}
-              type="button"
-              onClick={() => router.push(`/pilots/${pilot.id}`)}
-              className="block w-full space-y-3 p-4 text-left transition-colors hover:bg-[#F9FAFB]"
+              role="button"
+              tabIndex={0}
+              onClick={() => router.push(buildPilotHref(pilot.id))}
+              onKeyDown={(e) => e.key === "Enter" && router.push(buildPilotHref(pilot.id))}
+              className="p-4 space-y-3 cursor-pointer transition-colors hover:bg-[#F9FAFB] text-left"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium text-[#101828]">{pilot.name}</p>
-                  {pilot.objective ? (
-                    <p className="mt-1 line-clamp-2 text-xs text-[#667085]">{pilot.objective}</p>
-                  ) : null}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-[#101828]">{pilot.name}</p>
+                    {pilot.objective ? (
+                      <div className="mt-1 max-h-[4.5rem] overflow-y-auto text-xs text-[#667085] leading-relaxed">
+                        {pilot.objective}
+                      </div>
+                    ) : null}
+                  </div>
+                  <Badge color={statusCfg.color} bgColor={statusCfg.bgColor}>
+                    {statusCfg.label}
+                  </Badge>
                 </div>
-                <Badge color={statusCfg.color} bgColor={statusCfg.bgColor}>
-                  {statusCfg.label}
-                </Badge>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-[#667085]">Inicio</p>
-                  <p className="mt-1 font-medium text-[#101828]">{formatDateShort(pilot.start_date)}</p>
+                <div className="flex items-end justify-between gap-3 text-sm flex-wrap">
+                  <div className="flex gap-4">
+                    <div>
+                      <p className="text-[11px] tracking-wide text-[#667085]">Desde</p>
+                      <p className="mt-1 font-medium text-[#101828]">{formatDateShort(pilot.start_date)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] tracking-wide text-[#667085]">Hasta</p>
+                      <p className="mt-1 font-medium text-[#101828]">{formatDateShort(pilot.end_date)}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[11px] tracking-wide text-[#667085]">Participantes</p>
+                      <p className="mt-1 font-medium text-[#101828]">
+                        {(participantesMap[pilot.id] ?? 0) > 0
+                          ? participantesMap[pilot.id]
+                          : "—"}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[11px] tracking-wide text-[#667085]">Mejora</p>
+                      <p className="mt-1 font-medium text-[#101828]">
+                        {productivityMap[pilot.id] != null
+                          ? `${productivityMap[pilot.id]} %`
+                          : "—"}
+                      </p>
+                    </div>
+                  </div>
+                  {canEdit && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(buildPilotHref(pilot.id, true));
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Evento
+                    </Button>
+                  )}
                 </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-[#667085]">Fin</p>
-                  <p className="mt-1 font-medium text-[#101828]">{formatDateShort(pilot.end_date)}</p>
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-[#667085]">Formados</p>
-                  <p className="mt-1 font-medium text-[#101828]">
-                    {pilot.trained_people_count > 0 ? pilot.trained_people_count : "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-[#667085]">Productividad</p>
-                  <p className="mt-1 font-medium text-[#101828]">—</p>
-                </div>
-              </div>
-            </button>
+            </div>
           );
         })}
       </div>
@@ -79,24 +132,29 @@ export function PilotsTable({ pilots }: PilotsTableProps) {
       <table className="hidden w-full text-sm md:table">
         <thead>
           <tr className="border-b border-[#E4E7EC] bg-[#F9FAFB]">
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[#667085]">
-              Piloto
+            <th className="px-4 py-3 text-left text-xs font-medium tracking-widest text-[#667085]">
+              Pilotos
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[#667085]">
+            <th className="px-4 py-3 text-left text-xs font-medium tracking-widest text-[#667085]">
               Estado
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[#667085]">
-              Inicio
+            <th className="px-4 py-3 text-left text-xs font-medium tracking-widest text-[#667085]">
+              Desde
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[#667085]">
-              Fin
+            <th className="px-4 py-3 text-left text-xs font-medium tracking-widest text-[#667085]">
+              Hasta
             </th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-[#667085]">
-              Formados
+            <th className="px-4 py-3 text-center text-xs font-medium tracking-widest text-[#667085]">
+              Participantes
             </th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-[#667085]">
-              Productividad
+            <th className="px-4 py-3 text-center text-xs font-medium tracking-widest text-[#667085]">
+              Mejora
             </th>
+            {canEdit && (
+              <th className="px-4 py-3 text-right text-xs font-medium tracking-widest text-[#667085]">
+                Hito
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-[#E4E7EC]">
@@ -105,13 +163,15 @@ export function PilotsTable({ pilots }: PilotsTableProps) {
             return (
               <tr
                 key={pilot.id}
-                onClick={() => router.push(`/pilots/${pilot.id}`)}
+                onClick={() => router.push(buildPilotHref(pilot.id))}
                 className="cursor-pointer bg-white transition-colors hover:bg-[#F9FAFB]"
               >
                 <td className="min-w-[200px] px-4 py-3.5">
                   <p className="font-medium text-[#101828]">{pilot.name}</p>
                   {pilot.objective && (
-                    <p className="mt-0.5 line-clamp-1 text-xs text-[#667085]">{pilot.objective}</p>
+                    <div className="mt-0.5 max-h-[4.5rem] overflow-y-auto text-xs text-[#667085] leading-relaxed">
+                      {pilot.objective}
+                    </div>
                   )}
                 </td>
                 <td className="px-4 py-3.5">
@@ -125,12 +185,31 @@ export function PilotsTable({ pilots }: PilotsTableProps) {
                 <td className="whitespace-nowrap px-4 py-3.5 text-[#667085]">
                   {formatDate(pilot.end_date)}
                 </td>
-                <td className="px-4 py-3.5 text-right font-medium text-[#101828]">
-                  {pilot.trained_people_count > 0 ? pilot.trained_people_count : "—"}
+                <td className="px-4 py-3.5 text-center font-medium text-[#101828]">
+                  {(participantesMap[pilot.id] ?? 0) > 0
+                    ? participantesMap[pilot.id]
+                    : "—"}
                 </td>
-                <td className="px-4 py-3.5 text-right font-medium text-[#101828]">
-                  —
+                <td className="px-4 py-3.5 text-center font-medium text-[#101828]">
+                  {productivityMap[pilot.id] != null
+                    ? `${productivityMap[pilot.id]} %`
+                    : "—"}
                 </td>
+                {canEdit && (
+                  <td className="px-4 py-3.5 text-right">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(buildPilotHref(pilot.id, true));
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Evento
+                    </Button>
+                  </td>
+                )}
               </tr>
             );
           })}

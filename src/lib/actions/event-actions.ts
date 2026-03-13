@@ -37,11 +37,14 @@ export async function createImpactEvent(
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "No autenticado" };
 
+  const description =
+    (parsed.data.description ?? "").trim() || "—";
+
   const { error } = await db.from("impact_events").insert({
     pilot_id: pilotId,
     event_type: parsed.data.event_type,
     event_date: parsed.data.event_date,
-    description: parsed.data.description,
+    description,
     trained_people_event:
       parsed.data.event_type === "formacion"
         ? (parsed.data.trained_people_event ?? null)
@@ -88,12 +91,15 @@ export async function updateImpactEvent(
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "No autenticado" };
 
+  const description =
+    (parsed.data.description ?? "").trim() || "—";
+
   const { error } = await db
     .from("impact_events")
     .update({
       event_type: parsed.data.event_type,
       event_date: parsed.data.event_date,
-      description: parsed.data.description,
+      description,
       trained_people_event:
         parsed.data.event_type === "formacion"
           ? (parsed.data.trained_people_event ?? null)

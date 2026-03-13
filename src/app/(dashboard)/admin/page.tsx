@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { listUsers } from "@/lib/queries/users";
 import { Topbar } from "@/components/topbar";
@@ -28,7 +30,14 @@ export default async function AdminPage() {
         userIdentifier={user.user_metadata?.login_name ?? user.email ?? ""}
       />
       <div className="mx-auto max-w-[1280px] px-6 py-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <Link
+          href="/"
+          className="mb-4 inline-flex items-center gap-1.5 text-sm text-[#667085] transition-colors hover:text-[#101828]"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a pilotos
+        </Link>
+        <div className="mb-4 mt-2 flex items-start justify-between gap-4">
           <div>
             <h2 className="text-base font-semibold text-[#101828]">
               Gestión de usuarios

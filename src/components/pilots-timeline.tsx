@@ -8,9 +8,10 @@ import type { Pilot } from "@/lib/types/database";
 
 interface PilotsTimelineProps {
   pilots: Pilot[];
+  participantesMap?: Record<string, number>;
 }
 
-export function PilotsTimeline({ pilots }: PilotsTimelineProps) {
+export function PilotsTimeline({ pilots, participantesMap = {} }: PilotsTimelineProps) {
   const router = useRouter();
 
   const pilotsWithDates = pilots.filter((p) => p.start_date);
@@ -124,7 +125,7 @@ export function PilotsTimeline({ pilots }: PilotsTimelineProps) {
                       border: `1.5px solid ${statusCfg.borderColor}`,
                     }}
                     onClick={() => router.push(`/pilots/${pilot.id}`)}
-                    title={`${pilot.name} — ${statusCfg.label}${pilot.trained_people_count ? ` · ${pilot.trained_people_count} formados` : ""}`}
+                    title={`${pilot.name} — ${statusCfg.label}${(participantesMap[pilot.id] ?? 0) > 0 ? ` · ${participantesMap[pilot.id]} participantes` : ""}`}
                   />
                 </div>
               </div>

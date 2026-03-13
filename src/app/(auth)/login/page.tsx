@@ -29,6 +29,11 @@ export default function LoginPage() {
       return;
     }
 
+    if (result.actionLink) {
+      window.location.href = result.actionLink;
+      return;
+    }
+
     router.push("/");
     router.refresh();
   }
@@ -37,8 +42,8 @@ export default function LoginPage() {
     <div className="w-full max-w-sm">
       <div className="bg-white rounded-xl border border-[#E4E7EC] shadow-card p-8">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#EFF4FF]">
-            <span className="text-lg font-bold text-[#2563EB]">IA</span>
+          <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#0F4C81]">
+            <span className="text-lg font-bold text-white">IA</span>
           </div>
           <h1 className="text-xl font-semibold text-[#101828]">Pilotos IA</h1>
           <p className="mt-1 text-sm text-[#667085]">Introduce tu usuario, alias y, si quieres, una contraseña</p>
@@ -93,7 +98,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <Button type="submit" disabled={loading} className="mt-2 w-full">
+          <Button type="submit" disabled={loading} className="mt-2 w-full bg-[#0F4C81] hover:bg-[#0E3D6B]">
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />

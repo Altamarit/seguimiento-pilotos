@@ -8,6 +8,7 @@ export const pilotSchema = z
     start_date: z.string().nullable().optional(),
     end_date: z.string().nullable().optional(),
     trained_people_count: z.coerce.number().min(0).default(0),
+    productivity_improvement_base: z.coerce.number().min(-100).max(999.99).default(0),
   })
   .refine(
     (data) => {
@@ -26,7 +27,7 @@ export const impactEventSchema = z
   .object({
     event_type: z.enum(["formacion", "productividad", "otro"]),
     event_date: z.string().min(1, "La fecha es obligatoria"),
-    description: z.string().min(1, "La descripción es obligatoria").trim(),
+    description: z.string().trim().optional().default(""),
     trained_people_event: z.coerce.number().min(0).nullable().optional(),
     productivity_improvement_pct: z.coerce
       .number()

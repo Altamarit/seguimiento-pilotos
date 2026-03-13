@@ -27,6 +27,7 @@ export async function createPilot(): Promise<void> {
       name: "Nuevo piloto",
       status: "planificado",
       trained_people_count: 0,
+      productivity_improvement_base: 0,
       created_by: user.id,
       updated_by: user.id,
     })
@@ -48,6 +49,7 @@ export async function updatePilot(
     start_date?: string | null;
     end_date?: string | null;
     trained_people_count: number;
+    productivity_improvement_base: number;
   }
 ): Promise<ActionResult> {
   const parsed = pilotSchema.safeParse(formData);

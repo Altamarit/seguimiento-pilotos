@@ -27,10 +27,11 @@ interface TopbarProps {
   title: string;
   userName: string;
   userIdentifier: string;
+  headerAction?: React.ReactNode;
   children?: React.ReactNode;
 }
 
-export function Topbar({ title, userName, userIdentifier, children }: TopbarProps) {
+export function Topbar({ title, userName, userIdentifier, headerAction, children }: TopbarProps) {
   const router = useRouter();
   const { isAdmin } = useRole();
   const [isAliasDialogOpen, setIsAliasDialogOpen] = useState(false);
@@ -77,21 +78,34 @@ export function Topbar({ title, userName, userIdentifier, children }: TopbarProp
     });
   }
 
+  const displayName = userName || userIdentifier;
+  const firstName = displayName ? displayName.split(/\s+/)[0] ?? displayName : "Usuario";
+
   return (
     <>
-      <header className="sticky top-0 z-20 border-b border-[#E4E7EC] bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-[#0E3D6B] bg-[#0F4C81]">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-lg font-semibold text-[#101828] sm:text-xl">{title}</h1>
+            <h1 className="text-lg font-semibold text-white sm:text-xl">{title}</h1>
+
+            {headerAction ? (
+              <div className="flex flex-1 items-center justify-center">
+                {headerAction}
+              </div>
+            ) : null}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="max-w-[220px] gap-2 px-2 sm:px-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF4FF]">
-                    <User className="h-3.5 w-3.5 text-[#2563EB]" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="max-w-[220px] gap-2 px-2 sm:px-3 text-white hover:bg-white/10 hover:text-white"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
+                    <User className="h-3.5 w-3.5 text-[#7DD3FC]" />
                   </div>
-                  <span className="truncate text-sm text-[#344054]">
-                    {userName || userIdentifier}
+                  <span className="truncate text-sm text-white">
+                    Hola {firstName}
                   </span>
                 </Button>
               </DropdownMenuTrigger>

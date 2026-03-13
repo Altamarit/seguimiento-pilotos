@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { updatePilot, deletePilot } from "@/lib/actions/pilot-actions";
 import { formatDate, STATUS_CONFIG } from "@/lib/utils";
@@ -37,6 +36,7 @@ export function PilotHeader({ pilot }: PilotHeaderProps) {
   const [startDate, setStartDate] = useState(pilot.start_date ?? "");
   const [endDate, setEndDate] = useState(pilot.end_date ?? "");
   const [trainedPeople, setTrainedPeople] = useState(pilot.trained_people_count);
+  const [productivityBase, setProductivityBase] = useState(pilot.productivity_improvement_base ?? 0);
 
   const isDirty =
     name !== pilot.name ||
@@ -44,7 +44,8 @@ export function PilotHeader({ pilot }: PilotHeaderProps) {
     status !== pilot.status ||
     startDate !== (pilot.start_date ?? "") ||
     endDate !== (pilot.end_date ?? "") ||
-    trainedPeople !== pilot.trained_people_count;
+    trainedPeople !== pilot.trained_people_count ||
+    productivityBase !== (pilot.productivity_improvement_base ?? 0);
 
   function handleSave() {
     setError(null);
@@ -57,6 +58,7 @@ export function PilotHeader({ pilot }: PilotHeaderProps) {
         start_date: startDate || null,
         end_date: endDate || null,
         trained_people_count: trainedPeople,
+        productivity_improvement_base: productivityBase,
       });
       if (result.success) {
         setSuccess(true);
@@ -131,6 +133,26 @@ export function PilotHeader({ pilot }: PilotHeaderProps) {
       </Dialog>
 
     <div className="rounded-lg border border-[#E4E7EC] bg-white p-6 shadow-card">
+      <div className="mb-4 flex gap-1">
+        {[
+          { label: "Planificado", value: "planificado" as PilotStatus },
+          { label: "Activo", value: "en_marcha" as PilotStatus },
+          { label: "Finalizado", value: "finalizado" as PilotStatus },
+          { label: "Cancelado", value: "cancelado" as PilotStatus },
+        ].map(({ label, value }) => (
+          <Button
+            key={value}
+            type="button"
+            variant={status === value ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatus(value)}
+            className="flex-1 min-w-0 h-9 text-xs sm:text-sm"
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2 flex flex-col gap-1.5">
           <Label htmlFor="pilot-name">Nombre del piloto *</Label>
@@ -145,31 +167,18 @@ export function PilotHeader({ pilot }: PilotHeaderProps) {
 
         <div className="sm:col-span-2 flex flex-col gap-1.5">
           <Label htmlFor="pilot-objective">Objetivo funcional</Label>
-          <Input
+          <textarea
             id="pilot-objective"
+            rows={4}
             value={objective}
             onChange={(e) => setObjective(e.target.value)}
             placeholder="Describe el objetivo del piloto"
+            className="flex min-h-[6rem] w-full resize-none overflow-y-auto rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#101828] placeholder:text-[#98A2B3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label>Estado</Label>
-          <Select value={status} onValueChange={(v) => setStatus(v as PilotStatus)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="planificado">Planificado</SelectItem>
-              <SelectItem value="en_marcha">En marcha</SelectItem>
-              <SelectItem value="finalizado">Finalizado</SelectItem>
-              <SelectItem value="cancelado">Cancelado</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="trained-people">Personas formadas (piloto)</Label>
+          <Label htmlFor="trained-people">Participantes</Label>
           <Input
             id="trained-people"
             type="number"
@@ -180,23 +189,37 @@ export function PilotHeader({ pilot }: PilotHeaderProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="start-date">Fecha inicio</Label>
+          <Label htmlFor="productivity-base">Mejora</Label>
           <Input
-            id="start-date"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            id="productivity-base"
+            type="number"
+            min={-100}
+            step={0.01}
+            value={productivityBase}
+            onChange={(e) => setProductivityBase(parseFloat(e.target.value) || 0)}
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="end-date">Fecha fin</Label>
-          <Input
-            id="end-date"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
+        <div className="grid grid-cols-2 gap-3 sm:col-span-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="start-date">Desde</Label>
+            <Input
+              id="start-date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="end-date">Hasta</Label>
+            <Input
+              id="end-date"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 

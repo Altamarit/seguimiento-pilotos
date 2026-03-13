@@ -13,14 +13,14 @@ export function ViewToggle() {
   });
 
   return (
-    <div className="flex w-full items-center rounded-full bg-[#F2F4F7] p-0.5 sm:w-auto">
+    <div className="view-toggle flex shrink-0 items-center rounded-full bg-white/20 p-0.5">
       <button
         onClick={() => setView("list")}
         className={cn(
           "flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors sm:flex-none",
           view === "list"
-            ? "bg-white font-semibold text-[#101828] shadow-sm"
-            : "text-[#667085] hover:text-[#101828]"
+            ? "bg-white font-semibold text-[#0F4C81] shadow-sm"
+            : "text-white/90 hover:text-white hover:bg-white/10"
         )}
       >
         <LayoutList className="h-3.5 w-3.5" />
@@ -31,12 +31,12 @@ export function ViewToggle() {
         className={cn(
           "flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors sm:flex-none",
           view === "timeline"
-            ? "bg-white font-semibold text-[#101828] shadow-sm"
-            : "text-[#667085] hover:text-[#101828]"
+            ? "bg-white font-semibold text-[#0F4C81] shadow-sm"
+            : "text-white/90 hover:text-white hover:bg-white/10"
         )}
       >
         <GanttChart className="h-3.5 w-3.5" />
-        Cronológica
+        Calendar
       </button>
     </div>
   );

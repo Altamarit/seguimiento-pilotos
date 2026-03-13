@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getGlobalKPIs } from "@/lib/queries/kpis";
-import { listPilots } from "@/lib/queries/pilots";
-import { KpiCard, KpiCardSkeleton } from "@/components/kpi-card";
+import {
+  listPilots,
+  getPilotsProductivityMap,
+  getPilotsParticipantesMap,
+} from "@/lib/queries/pilots";
 import { PilotsTable, PilotsTableSkeleton } from "@/components/pilots-table";
 import { PilotsTimeline } from "@/components/pilots-timeline";
 import { ViewToggle } from "@/components/view-toggle";
@@ -18,22 +21,35 @@ interface HomePageProps {
 async function GlobalKPIsSection() {
   const kpis = await getGlobalKPIs();
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      <KpiCard label="Pilotos activos" value={kpis.activePilots} />
-      <KpiCard
-        label="Personas formadas"
-        value={kpis.totalTrainedPeople}
-        subtext="Total acumulado"
-      />
-      <KpiCard
-        label="Mejora productividad"
-        value={
-          kpis.avgProductivityImprovement !== null
-            ? `${kpis.avgProductivityImprovement.toFixed(1)} %`
-            : "—"
-        }
-        subtext="Media entre pilotos"
-      />
+    <div className="rounded-xl bg-[#0F4C81] p-4 sm:p-6">
+      <div className="grid grid-cols-3 gap-4 sm:gap-6">
+        <div className="text-center">
+          <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
+            Pilotos
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+            {kpis.activePilots}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
+            Participantes
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+            {kpis.totalTrainedPeople}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
+            Max. mejora
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+            {kpis.avgProductivityImprovement !== null
+              ? `${kpis.avgProductivityImprovement.toFixed(1)} %`
+              : "—"}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -45,9 +61,20 @@ async function PilotsViewSection({
   view: string;
   status: string;
 }) {
-  const pilots = await listPilots({ status: status as PilotStatus | "" });
-  if (view === "timeline") return <PilotsTimeline pilots={pilots} />;
-  return <PilotsTable pilots={pilots} />;
+  const [pilots, productivityMap, participantesMap] = await Promise.all([
+    listPilots({ status: status as PilotStatus | "" }),
+    getPilotsProductivityMap(),
+    getPilotsParticipantesMap(),
+  ]);
+  if (view === "timeline")
+    return <PilotsTimeline pilots={pilots} participantesMap={participantesMap} />;
+  return (
+    <PilotsTable
+      pilots={pilots}
+      productivityMap={productivityMap}
+      participantesMap={participantesMap}
+    />
+  );
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
@@ -66,28 +93,34 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         title="Pilotos IA"
         userName={user?.user_metadata?.full_name ?? ""}
         userIdentifier={user?.user_metadata?.login_name ?? user?.email ?? ""}
+        headerAction={<AddPilotButton />}
       >
-        <PilotsFilters />
-        <ViewToggle />
-        <AddPilotButton />
+        <div className="flex flex-shrink-0 flex-nowrap items-center gap-2 overflow-x-auto">
+          <ViewToggle />
+          <PilotsFilters />
+        </div>
       </Topbar>
 
       <div className="mx-auto max-w-[1280px] space-y-4 px-4 py-4 sm:px-6 sm:py-5">
         <Suspense
           fallback={
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <KpiCardSkeleton />
-              <KpiCardSkeleton />
-              <KpiCardSkeleton />
+            <div className="rounded-xl bg-[#0F4C81] p-4 sm:p-6">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="h-16 animate-pulse rounded-lg bg-white/20" />
+                <div className="h-16 animate-pulse rounded-lg bg-white/20" />
+                <div className="h-16 animate-pulse rounded-lg bg-white/20" />
+              </div>
             </div>
           }
         >
           <GlobalKPIsSection />
         </Suspense>
 
-        <Suspense fallback={<PilotsTableSkeleton />}>
-          <PilotsViewSection view={view} status={status} />
-        </Suspense>
+        <section>
+          <Suspense fallback={<PilotsTableSkeleton />}>
+            <PilotsViewSection view={view} status={status} />
+          </Suspense>
+        </section>
       </div>
     </>
   );

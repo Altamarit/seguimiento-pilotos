@@ -97,13 +97,13 @@ export function AdminUsersTable({ users, currentUserId }: AdminUsersTableProps) 
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[#E4E7EC] bg-[#F9FAFB]">
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[#667085]">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wide text-[#667085]">
                 Usuario
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[#667085]">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wide text-[#667085]">
                 Rol actual
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-[#667085]">
+              <th className="px-4 py-3 text-left text-xs font-medium tracking-wide text-[#667085]">
                 Cambiar rol
               </th>
               <th className="px-4 py-3" />

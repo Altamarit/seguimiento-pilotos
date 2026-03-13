@@ -77,7 +77,9 @@ export function ImpactEventCard({ event, onEdit }: ImpactEventCardProps) {
               </div>
             )}
           </div>
-          <p className="mt-1.5 text-sm text-[#101828]">{event.description}</p>
+          {event.description && event.description !== "—" && (
+            <p className="mt-1.5 text-sm text-[#101828]">{event.description}</p>
+          )}
           {event.event_type === "formacion" && event.trained_people_event !== null && (
             <p className="mt-1 text-sm font-semibold text-[#2563EB]">
               +{event.trained_people_event} personas formadas

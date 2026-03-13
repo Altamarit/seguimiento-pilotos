@@ -16,6 +16,8 @@ const config: Config = {
         "text-main": "#101828",
         "text-secondary": "#667085",
         "icon-muted": "#98A2B3",
+        "header-bg": "#0F4C81",
+        "header-accent": "#7DD3FC",
         primary: {
           DEFAULT: "#2563EB",
           soft: "#EFF4FF",

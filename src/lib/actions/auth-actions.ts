@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 export interface AuthResult {
   success: boolean;
   error?: string;
+  actionLink?: string;
 }
 
 function looksLikeEmail(value: string) {
@@ -71,8 +72,6 @@ async function loginWithMagicLink(
     email: authEmail,
   });
 
-  let hashedToken: string;
-
   if (linkError) {
     // Usuario no existe → crearlo
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
@@ -89,24 +88,12 @@ async function loginWithMagicLink(
       email: authEmail,
     });
     if (newLinkError) return { success: false, error: newLinkError.message };
-    hashedToken = newLinkData.properties.hashed_token;
+    return { success: true, actionLink: newLinkData.properties.action_link };
   } else {
     // Usuario existe → actualizar alias
     await syncAlias(adminClient, linkData.user.id, alias, userIdentifier);
-
-    hashedToken = linkData.properties.hashed_token;
+    return { success: true, actionLink: linkData.properties.action_link };
   }
-
-  // Verificar el token servidor → establece cookies de sesión
-  const supabase = await createClient();
-  const { error: verifyError } = await supabase.auth.verifyOtp({
-    token_hash: hashedToken,
-    type: "magiclink",
-  });
-
-  if (verifyError) return { success: false, error: verifyError.message };
-
-  return { success: true };
 }
 
 async function loginWithPassword(

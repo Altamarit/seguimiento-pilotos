@@ -61,7 +61,7 @@ export function Sidebar() {
 
         {isAdmin && (
           <div className="mt-4 border-t border-[#E4E7EC] pt-4">
-            <p className="mb-1 px-3 text-[11px] font-medium uppercase tracking-wider text-[#98A2B3]">
+            <p className="mb-1 px-3 text-[11px] font-medium tracking-wider text-[#98A2B3]">
               Sistema
             </p>
             {adminItems.map((item) => {

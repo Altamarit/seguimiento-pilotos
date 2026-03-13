@@ -27,6 +27,7 @@ export interface Pilot {
   start_date: string | null;
   end_date: string | null;
   trained_people_count: number;
+  productivity_improvement_base: number;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
@@ -100,6 +101,7 @@ export type Database = {
           start_date?: string | null;
           end_date?: string | null;
           trained_people_count?: number;
+          productivity_improvement_base?: number;
           created_by?: string | null;
           updated_by?: string | null;
           created_at?: string;
@@ -113,6 +115,7 @@ export type Database = {
           start_date?: string | null;
           end_date?: string | null;
           trained_people_count?: number;
+          productivity_improvement_base?: number;
           updated_by?: string | null;
           updated_at?: string;
         };

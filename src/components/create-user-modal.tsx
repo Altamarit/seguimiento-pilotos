@@ -86,9 +86,9 @@ export function CreateUserModal() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="lector">Lector — solo lectura</SelectItem>
-                  <SelectItem value="editor">Editor — crear y editar</SelectItem>
-                  <SelectItem value="admin">Admin — acceso completo</SelectItem>
+                  <SelectItem value="lector">Lector — Solo lectura</SelectItem>
+                  <SelectItem value="editor">Editor — Crear y editar</SelectItem>
+                  <SelectItem value="admin">Admin — Acceso completo</SelectItem>
                 </SelectContent>
               </Select>
             </div>

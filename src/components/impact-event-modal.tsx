@@ -18,7 +18,7 @@ import type { ImpactEvent, ImpactEventType } from "@/lib/types/database";
 
 interface ImpactEventModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (eventCreated?: boolean) => void;
   pilotId: string;
   event?: ImpactEvent | null;
 }
@@ -43,7 +43,7 @@ export function ImpactEventModal({
     if (event) {
       setEventType(event.event_type);
       setEventDate(event.event_date);
-      setDescription(event.description);
+      setDescription(event.description === "—" ? "" : event.description);
       if (event.event_type === "formacion") {
         setNumericValue(event.trained_people_event?.toString() ?? "");
       } else if (event.event_type === "productividad") {
@@ -78,7 +78,7 @@ export function ImpactEventModal({
         : await createImpactEvent(pilotId, payload);
 
       if (result.success) {
-        onClose();
+        onClose(!event);
       } else {
         setError(result.error ?? "Error al guardar el evento");
       }
@@ -88,11 +88,15 @@ export function ImpactEventModal({
   const isEditing = !!event;
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose(false)}>
+      <DialogContent
+        className={`max-h-[calc(100vh-2rem)] overflow-y-auto ${
+          isEditing ? "top-6 translate-y-0 sm:top-10" : ""
+        }`}
+      >
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Editar evento de impacto" : "Añadir evento de impacto"}
+            {isEditing ? "Editar hito" : "Nuevo evento"}
           </DialogTitle>
         </DialogHeader>
 
@@ -143,7 +147,7 @@ export function ImpactEventModal({
 
           {eventType === "productividad" && (
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="event-value">% mejora de productividad</Label>
+              <Label htmlFor="event-value">% Mejora de productividad</Label>
               <Input
                 id="event-value"
                 type="number"
@@ -161,12 +165,14 @@ export function ImpactEventModal({
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="event-desc">Descripción</Label>
-            <Input
+            <Label htmlFor="event-desc">Descripción (opcional)</Label>
+            <textarea
               id="event-desc"
+              rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Breve descripción del evento"
+              className="flex min-h-[6rem] w-full resize-none overflow-y-auto rounded-md border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#101828] placeholder:text-[#98A2B3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
@@ -178,7 +184,7 @@ export function ImpactEventModal({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+          <Button variant="ghost" onClick={() => onClose(false)} disabled={isPending}>
             Cancelar
           </Button>
           <Button onClick={handleSave} disabled={isPending}>

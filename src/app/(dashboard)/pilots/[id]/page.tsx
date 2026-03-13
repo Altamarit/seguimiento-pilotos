@@ -6,19 +6,19 @@ import { getPilot } from "@/lib/queries/pilots";
 import { listImpactEvents, countImpactEvents } from "@/lib/queries/impact-events";
 import { getPilotKPIs } from "@/lib/queries/kpis";
 import { PilotHeader } from "@/components/pilot-header";
-import { KpiCard } from "@/components/kpi-card";
 import { ImpactEventsSection } from "@/components/impact-events-section";
 import { Topbar } from "@/components/topbar";
 
 interface PilotPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; openEvent?: string }>;
 }
 
 export default async function PilotPage({ params, searchParams }: PilotPageProps) {
   const { id } = await params;
   const sp = await searchParams;
   const backView = sp?.view ?? "list";
+  const shouldOpenEventModal = sp?.openEvent === "1";
 
   const supabase = await createClient();
   const {
@@ -33,6 +33,15 @@ export default async function PilotPage({ params, searchParams }: PilotPageProps
   ]);
 
   if (!pilot) notFound();
+
+  const impactEventsSection = (
+    <ImpactEventsSection
+      events={events}
+      totalEvents={totalEvents}
+      pilotId={id}
+      initialOpen={shouldOpenEventModal}
+    />
+  );
 
   return (
     <>
@@ -53,28 +62,32 @@ export default async function PilotPage({ params, searchParams }: PilotPageProps
 
         <PilotHeader pilot={pilot} />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <KpiCard
-            label="Personas formadas (piloto)"
-            value={kpis.trainedPeopleCount}
-            subtext="Dato manual del piloto"
-          />
-          <KpiCard
-            label="Mejora de productividad"
-            value={
-              kpis.productivityImprovementPct !== null
-                ? `${kpis.productivityImprovementPct} %`
-                : "—"
-            }
-            subtext="Último valor registrado"
-          />
+        {events.length > 0 ? impactEventsSection : null}
+
+        <div className="rounded-xl bg-[#0F4C81] p-4 sm:p-6">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="text-center">
+              <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
+                Participantes
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+                {kpis.trainedPeopleCount}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
+                Mejora
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+                {kpis.productivityImprovementPct !== null
+                  ? `${kpis.productivityImprovementPct} %`
+                  : "—"}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <ImpactEventsSection
-          events={events}
-          totalEvents={totalEvents}
-          pilotId={id}
-        />
+        {events.length === 0 ? impactEventsSection : null}
       </div>
     </>
   );
