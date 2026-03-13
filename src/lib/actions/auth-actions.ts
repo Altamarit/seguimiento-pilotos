@@ -58,12 +58,9 @@ async function syncAlias(
   });
 }
 
-async function verifyMagicToken(authEmail: string, actionLink: string): Promise<AuthResult> {
-  const token = new URL(actionLink).searchParams.get("token");
-  if (!token) return { success: false, error: "No se pudo obtener el token de verificación." };
-
+async function verifyMagicToken(hashedToken: string): Promise<AuthResult> {
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ email: authEmail, token, type: "magiclink" });
+  const { error } = await supabase.auth.verifyOtp({ token_hash: hashedToken, type: "magiclink" });
   if (error) return { success: false, error: error.message };
 
   return { success: true };
@@ -98,11 +95,11 @@ async function loginWithMagicLink(
     });
     if (newLinkError) return { success: false, error: newLinkError.message };
 
-    return verifyMagicToken(authEmail, newLinkData.properties.action_link);
+    return verifyMagicToken(newLinkData.properties.hashed_token);
   } else {
     // Usuario existe → actualizar alias
     await syncAlias(adminClient, linkData.user.id, alias, userIdentifier);
-    return verifyMagicToken(authEmail, linkData.properties.action_link);
+    return verifyMagicToken(linkData.properties.hashed_token);
   }
 }
 
