@@ -13,7 +13,7 @@ export function ViewToggle() {
   });
 
   return (
-    <div className="view-toggle flex shrink-0 items-center rounded-full bg-white/20 p-0.5">
+    <div className="view-toggle flex w-full items-center rounded-full bg-white/20 p-0.5 sm:w-auto sm:shrink-0">
       <button
         onClick={() => setView("list")}
         className={cn(

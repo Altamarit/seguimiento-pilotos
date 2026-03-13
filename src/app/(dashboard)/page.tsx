@@ -95,10 +95,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         userIdentifier={user?.user_metadata?.login_name ?? user?.email ?? ""}
         headerAction={<AddPilotButton />}
       >
-        <div className="flex flex-shrink-0 flex-nowrap items-center gap-2 overflow-x-auto">
-          <ViewToggle />
-          <PilotsFilters />
-        </div>
+        <ViewToggle />
+        <PilotsFilters />
       </Topbar>
 
       <div className="mx-auto max-w-[1280px] space-y-4 px-4 py-4 sm:px-6 sm:py-5">
