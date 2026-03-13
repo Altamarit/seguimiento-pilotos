@@ -74,7 +74,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         title={
           <>
             Pilotos IA{" "}
-            <span className="text-xs font-normal opacity-70">v0.5</span>
+            <span className="text-xs font-normal opacity-70">v0.6</span>
           </>
         }
         userName={user?.user_metadata?.full_name ?? ""}
