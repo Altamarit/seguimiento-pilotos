@@ -18,7 +18,7 @@ interface HomePageProps {
 async function GlobalKPIsSection() {
   const kpis = await getGlobalKPIs();
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
       <KpiCard label="Pilotos activos" value={kpis.activePilots} />
       <KpiCard
         label="Personas formadas"
@@ -68,10 +68,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <AddPilotButton />
       </Topbar>
 
-      <div className="mx-auto max-w-[1280px] px-6 py-6 space-y-6">
+      <div className="mx-auto max-w-[1280px] space-y-4 px-4 py-4 sm:px-6 sm:py-5">
         <Suspense
           fallback={
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <KpiCardSkeleton />
               <KpiCardSkeleton />
               <KpiCardSkeleton />

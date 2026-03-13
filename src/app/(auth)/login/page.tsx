@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { loginOrCreate } from "@/lib/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [alias, setAlias] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -18,16 +21,16 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const result = await loginOrCreate(email.trim(), alias.trim());
+    const result = await loginOrCreate(email, alias, password);
 
-    if (!result.success || !result.actionLink) {
+    if (!result.success) {
       setError(result.error ?? "Error al acceder. Inténtalo de nuevo.");
       setLoading(false);
       return;
     }
 
-    // Redirigir al magic link de Supabase → él se encarga del callback
-    window.location.href = result.actionLink;
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -38,7 +41,7 @@ export default function LoginPage() {
             <span className="text-lg font-bold text-[#2563EB]">IA</span>
           </div>
           <h1 className="text-xl font-semibold text-[#101828]">Pilotos IA</h1>
-          <p className="mt-1 text-sm text-[#667085]">Introduce tus datos para acceder</p>
+          <p className="mt-1 text-sm text-[#667085]">Introduce tu usuario, alias y, si quieres, una contraseña</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -67,6 +70,21 @@ export default function LoginPage() {
               required
               autoComplete="nickname"
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="password">Contraseña</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Opcional"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
+            <p className="text-xs text-[#667085]">
+              Si la dejas vacía, se mantendrá el acceso automático actual.
+            </p>
           </div>
 
           {error && (

@@ -7,9 +7,9 @@ export function PilotsFilters() {
   const [status, setStatus] = useQueryState("status", { defaultValue: "" });
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="w-full sm:w-auto">
       <Select value={status} onValueChange={(v) => setStatus(v === "all" ? "" : v)}>
-        <SelectTrigger className="h-9 w-40 text-sm">
+        <SelectTrigger className="h-9 w-full text-sm sm:w-40">
           <SelectValue placeholder="Todos los estados" />
         </SelectTrigger>
         <SelectContent>

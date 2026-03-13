@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar } from "@/components/sidebar";
 import { RoleProvider } from "@/components/role-provider";
 import type { AppRole } from "@/lib/types/database";
 
@@ -24,8 +23,7 @@ export default async function DashboardLayout({
   return (
     <RoleProvider role={role}>
       <div className="min-h-screen bg-[#F5F5F7]">
-        <Sidebar />
-        <main className="pl-60 pt-16">{children}</main>
+        <main>{children}</main>
       </div>
     </RoleProvider>
   );

@@ -28,7 +28,7 @@ export function AddPilotButton() {
 
   return (
     <div>
-      <Button onClick={handleClick} disabled={isPending} size="sm">
+      <Button onClick={handleClick} disabled={isPending} size="sm" className="w-full sm:w-auto">
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
