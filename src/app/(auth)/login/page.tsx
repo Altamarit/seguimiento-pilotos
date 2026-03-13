@@ -1,25 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { loginOrCreate } from "@/lib/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+const ERROR_MESSAGES: Record<string, string> = {
+  usuario: "El usuario es obligatorio.",
+  alias: "El alias no puede estar en blanco.",
+  password_required: "La contraseña es obligatoria para este flujo.",
+  bad_password: "No se ha podido acceder con esa contraseña.",
+  auth: "Error de autenticación. Inténtalo de nuevo.",
+};
+
+function LoginForm() {
+  const searchParams = useSearchParams();
   const [userIdentifier, setUserIdentifier] = useState("");
   const [alias, setAlias] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (err) {
+      try {
+        setError(ERROR_MESSAGES[err] ?? decodeURIComponent(err));
+      } catch {
+        setError(ERROR_MESSAGES[err] ?? "Error al acceder.");
+      }
+    }
+  }, [searchParams]);
+
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
     setError(null);
+    if (password) {
+      setLoading(true);
+      return;
+    }
+    e.preventDefault();
     setLoading(true);
 
-    const result = await loginOrCreate(userIdentifier, alias, password);
+    const result = await loginOrCreate(userIdentifier, alias);
 
     if (!result.success) {
       setError(result.error ?? "Error al acceder. Inténtalo de nuevo.");
@@ -29,12 +54,7 @@ export default function LoginPage() {
 
     if (result.actionLink) {
       window.location.href = result.actionLink;
-      return;
     }
-
-    // Redirección completa (no router.push) para que las cookies de sesión
-    // de la Server Action estén ya en el navegador antes de la siguiente petición.
-    window.location.href = "/";
   }
 
   return (
@@ -48,11 +68,17 @@ export default function LoginPage() {
           <p className="mt-1 text-sm text-[#667085]">Introduce tu usuario, alias y, si quieres, una contraseña</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form
+          action={password ? "/api/auth/login" : undefined}
+          method="post"
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+        >
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="userIdentifier">Usuario</Label>
             <Input
               id="userIdentifier"
+              name="userIdentifier"
               type="text"
               placeholder="usuario123"
               value={userIdentifier}
@@ -67,6 +93,7 @@ export default function LoginPage() {
             <Label htmlFor="alias">Alias</Label>
             <Input
               id="alias"
+              name="alias"
               type="text"
               placeholder="¿Cómo quieres que te llamemos?"
               value={alias}
@@ -80,6 +107,7 @@ export default function LoginPage() {
             <Label htmlFor="password">Contraseña</Label>
             <Input
               id="password"
+              name="password"
               type="password"
               placeholder="Opcional"
               value={password}
@@ -110,5 +138,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-sm animate-pulse rounded-xl border border-[#E4E7EC] bg-white p-8 shadow-card" />}>
+      <LoginForm />
+    </Suspense>
   );
 }
