@@ -22,7 +22,11 @@ export default async function AdminPage() {
 
   return (
     <>
-      <Topbar title="Administración" userName={user.user_metadata?.full_name ?? ""} userEmail={user.email ?? ""} />
+      <Topbar
+        title="Administración"
+        userName={user.user_metadata?.full_name ?? ""}
+        userIdentifier={user.user_metadata?.login_name ?? user.email ?? ""}
+      />
       <div className="mx-auto max-w-[1280px] px-6 py-6">
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>

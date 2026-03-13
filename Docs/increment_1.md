@@ -4,9 +4,10 @@
 
 - [x] La pantalla de login solo es necesaria la primera vez que se conecta el usuario.
 - [x] La pantalla de login ahora pide:
-  - usuario: sigue siendo el email
+  - usuario: ya no necesita ser una dirección de email válida
   - alias: obligatorio y no puede quedar en blanco
   - contraseña: opcional
+- [x] Si el usuario introducido ya tiene formato email, se sigue aceptando para mantener compatibilidad con cuentas existentes.
 - [x] Si la contraseña se deja vacía, se mantiene el flujo de acceso automático actual.
 - [x] Si la contraseña se informa:
   - si el usuario ya existe y la contraseña es correcta, inicia sesión con contraseña

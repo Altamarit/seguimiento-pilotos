@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [userIdentifier, setUserIdentifier] = useState("");
   const [alias, setAlias] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const result = await loginOrCreate(email, alias, password);
+    const result = await loginOrCreate(userIdentifier, alias, password);
 
     if (!result.success) {
       setError(result.error ?? "Error al acceder. Inténtalo de nuevo.");
@@ -46,15 +46,15 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">Usuario</Label>
+            <Label htmlFor="userIdentifier">Usuario</Label>
             <Input
-              id="email"
+              id="userIdentifier"
               type="text"
-              placeholder="tu@empresa.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="usuario123"
+              value={userIdentifier}
+              onChange={(e) => setUserIdentifier(e.target.value)}
               required
-              autoComplete="email"
+              autoComplete="username"
               autoFocus
             />
           </div>

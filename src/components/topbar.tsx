@@ -26,11 +26,11 @@ import {
 interface TopbarProps {
   title: string;
   userName: string;
-  userEmail: string;
+  userIdentifier: string;
   children?: React.ReactNode;
 }
 
-export function Topbar({ title, userName, userEmail, children }: TopbarProps) {
+export function Topbar({ title, userName, userIdentifier, children }: TopbarProps) {
   const router = useRouter();
   const { isAdmin } = useRole();
   const [isAliasDialogOpen, setIsAliasDialogOpen] = useState(false);
@@ -90,13 +90,19 @@ export function Topbar({ title, userName, userEmail, children }: TopbarProps) {
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF4FF]">
                     <User className="h-3.5 w-3.5 text-[#2563EB]" />
                   </div>
-                  <span className="truncate text-sm text-[#344054]">{userName || userEmail}</span>
+                  <span className="truncate text-sm text-[#344054]">
+                    {userName || userIdentifier}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5">
-                  <p className="truncate text-sm font-medium text-[#101828]">{userName || userEmail}</p>
-                  <p className="truncate text-xs text-[#667085]">{userEmail}</p>
+                  <p className="truncate text-sm font-medium text-[#101828]">
+                    {userName || userIdentifier}
+                  </p>
+                  {userName && userIdentifier ? (
+                    <p className="truncate text-xs text-[#667085]">{userIdentifier}</p>
+                  ) : null}
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handlePrimaryAction}>
