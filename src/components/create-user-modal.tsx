@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,26 +13,24 @@ import type { AppRole } from "@/lib/types/database";
 export function CreateUserModal() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [alias, setAlias] = useState("");
   const [role, setRole] = useState<AppRole>("lector");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleClose() {
     setOpen(false);
     setEmail("");
-    setPassword("");
+    setAlias("");
     setRole("lector");
     setError(null);
-    setShowPassword(false);
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await createUser(email, password, role);
+      const result = await createUser(email, alias, role);
       if (result.success) {
         handleClose();
       } else {
@@ -59,7 +57,7 @@ export function CreateUserModal() {
               <Label htmlFor="new-email">Email</Label>
               <Input
                 id="new-email"
-                type="email"
+                type="text"
                 placeholder="usuario@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -69,28 +67,16 @@ export function CreateUserModal() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="new-password">Contraseña</Label>
-              <div className="relative">
-                <Input
-                  id="new-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Mínimo 6 caracteres"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  autoComplete="new-password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#98A2B3] hover:text-[#667085]"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+              <Label htmlFor="new-alias">Alias</Label>
+              <Input
+                id="new-alias"
+                type="text"
+                placeholder="Nombre visible del usuario"
+                value={alias}
+                onChange={(e) => setAlias(e.target.value)}
+                required
+                autoComplete="off"
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">

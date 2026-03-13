@@ -36,7 +36,7 @@ export default async function PilotPage({ params, searchParams }: PilotPageProps
 
   return (
     <>
-      <Topbar title={pilot.name} userEmail={user?.email ?? ""} />
+      <Topbar title={pilot.name} userName={user?.user_metadata?.full_name ?? ""} userEmail={user?.email ?? ""} />
 
       <div className="mx-auto max-w-[1280px] px-6 py-6 space-y-5">
         <Link

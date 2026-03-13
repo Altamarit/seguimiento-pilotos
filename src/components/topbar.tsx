@@ -14,11 +14,12 @@ import {
 
 interface TopbarProps {
   title: string;
+  userName: string;
   userEmail: string;
   children?: React.ReactNode;
 }
 
-export function Topbar({ title, userEmail, children }: TopbarProps) {
+export function Topbar({ title, userName, userEmail, children }: TopbarProps) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -42,7 +43,7 @@ export function Topbar({ title, userEmail, children }: TopbarProps) {
                 <User className="h-3.5 w-3.5 text-[#2563EB]" />
               </div>
               <span className="max-w-[160px] truncate text-sm text-[#344054]">
-                {userEmail}
+                {userName || userEmail}
               </span>
             </Button>
           </DropdownMenuTrigger>

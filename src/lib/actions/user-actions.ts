@@ -7,7 +7,7 @@ import type { AppRole } from "@/lib/types/database";
 
 export async function createUser(
   email: string,
-  password: string,
+  alias: string,
   role: AppRole = "lector"
 ): Promise<ActionResult> {
   const supabase = await createClient();
@@ -29,8 +29,8 @@ export async function createUser(
 
   const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
     email,
-    password,
     email_confirm: true,
+    user_metadata: { full_name: alias },
   });
 
   if (createError) {
@@ -40,9 +40,14 @@ export async function createUser(
     return { success: false, error: createError.message };
   }
 
+  await adminClient
+    .from("profiles")
+    .update({ full_name: alias })
+    .eq("id", newUser.user.id);
+
   const { error: roleError } = await adminClient
     .from("user_roles")
-    .insert({ user_id: newUser.user.id, role, assigned_by: user.id });
+    .upsert({ user_id: newUser.user.id, role, assigned_by: user.id });
 
   if (roleError) return { success: false, error: roleError.message };
 

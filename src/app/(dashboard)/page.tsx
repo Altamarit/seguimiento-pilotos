@@ -62,7 +62,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <>
-      <Topbar title="Pilotos IA" userEmail={user?.email ?? ""}>
+      <Topbar title="Pilotos IA" userName={user?.user_metadata?.full_name ?? ""} userEmail={user?.email ?? ""}>
         <PilotsFilters />
         <ViewToggle />
         <AddPilotButton />
