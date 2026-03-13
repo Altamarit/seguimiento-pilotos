@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const FILTER_OPTIONS = [
   { label: "All", value: "" },
-  { label: "Planificados", value: "planificado" },
+  { label: "Plan", value: "planificado" },
   { label: "Activos", value: "en_marcha" },
   { label: "Finalizados", value: "finalizado" },
   { label: "Cancelados", value: "cancelado" },
