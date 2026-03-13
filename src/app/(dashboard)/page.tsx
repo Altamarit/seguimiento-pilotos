@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getGlobalKPIs } from "@/lib/queries/kpis";
+import {
+  getGlobalKPIs,
+  getParticipantsTimeline,
+} from "@/lib/queries/kpis";
 import {
   listPilots,
   getPilotsProductivityMap,
@@ -12,6 +15,7 @@ import { ViewToggle } from "@/components/view-toggle";
 import { PilotsFilters } from "@/components/pilots-filters";
 import { AddPilotButton } from "@/components/add-pilot-button";
 import { Topbar } from "@/components/topbar";
+import { GlobalKPIsDisplay } from "@/components/global-kpis-display";
 import type { PilotStatus } from "@/lib/types/database";
 
 interface HomePageProps {
@@ -19,38 +23,15 @@ interface HomePageProps {
 }
 
 async function GlobalKPIsSection() {
-  const kpis = await getGlobalKPIs();
+  const [kpis, participantsTimeline] = await Promise.all([
+    getGlobalKPIs(),
+    getParticipantsTimeline(),
+  ]);
   return (
-    <div className="rounded-xl bg-[#0F4C81] p-4 sm:p-6">
-      <div className="grid grid-cols-3 gap-4 sm:gap-6">
-        <div className="text-center">
-          <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
-            Pilotos
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
-            {kpis.activePilots}
-          </p>
-        </div>
-        <div className="text-center">
-          <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
-            Participantes
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
-            {kpis.totalTrainedPeople}
-          </p>
-        </div>
-        <div className="text-center">
-          <p className="text-xs font-medium tracking-wider text-white/80 sm:text-sm">
-            Max. mejora
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-white sm:text-3xl">
-            {kpis.avgProductivityImprovement !== null
-              ? `${kpis.avgProductivityImprovement.toFixed(1)} %`
-              : "—"}
-          </p>
-        </div>
-      </div>
-    </div>
+    <GlobalKPIsDisplay
+      kpis={kpis}
+      participantsTimeline={participantsTimeline}
+    />
   );
 }
 
@@ -90,7 +71,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <>
       <Topbar
-        title="Pilotos IA"
+        title={
+          <>
+            Pilotos IA{" "}
+            <span className="text-xs font-normal opacity-70">v0.5</span>
+          </>
+        }
         userName={user?.user_metadata?.full_name ?? ""}
         userIdentifier={user?.user_metadata?.login_name ?? user?.email ?? ""}
         headerAction={<AddPilotButton />}

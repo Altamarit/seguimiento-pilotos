@@ -8,6 +8,7 @@ import { getPilotKPIs } from "@/lib/queries/kpis";
 import { PilotHeader } from "@/components/pilot-header";
 import { ImpactEventsSection } from "@/components/impact-events-section";
 import { Topbar } from "@/components/topbar";
+import { AddPilotButton } from "@/components/add-pilot-button";
 
 interface PilotPageProps {
   params: Promise<{ id: string }>;
@@ -49,6 +50,7 @@ export default async function PilotPage({ params, searchParams }: PilotPageProps
         title={pilot.name}
         userName={user?.user_metadata?.full_name ?? ""}
         userIdentifier={user?.user_metadata?.login_name ?? user?.email ?? ""}
+        headerAction={<AddPilotButton />}
       />
 
       <div className="mx-auto max-w-[1280px] px-6 py-6 space-y-5">

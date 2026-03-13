@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface TopbarProps {
-  title: string;
+  title: React.ReactNode;
   userName: string;
   userIdentifier: string;
   headerAction?: React.ReactNode;
